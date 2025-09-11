@@ -3,7 +3,6 @@ import Search from './components/Search';
 import Spinner from './components/Spinner';
 import MovieCard from './components/MovieCard';
 import { useDebounce } from 'react-use';
-import { Client } from 'appwrite';
 import { getTrendingMovies, updateSearchCount } from './appwrite.js';
 
 const API_BASE_URL = 'https://api.themoviedb.org/3';
@@ -25,7 +24,7 @@ const App = () => {
   const [movieList, setMovieList] = useState([]);
   const [trendingMovies, setTrendingMovies] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 
   // Debounce the search term to prevent too many API requests
   useDebounce(() => setDebouncedSearchTerm(searchTerm), 1000, [searchTerm])
@@ -37,7 +36,7 @@ const App = () => {
     try {
       const endpoint = query
         ? `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}`
-        : `${API_BASE_URL}/discover/movie?sprt_by=popularity_desc`;
+        : `${API_BASE_URL}/discover/movie?sort_by=popularity_desc`;
 
       const response = await fetch(endpoint, API_OPTIONS);
 
@@ -61,7 +60,7 @@ const App = () => {
 
     } catch (error) {
       console.log(`Error fetching movies: ${error}`);
-      setErrorMessage('Error fetching movies. Please try agaib later.')
+      setErrorMessage('Error fetching movies. Please try again later.')
 
     } finally {
       setIsLoading(false);
@@ -75,7 +74,7 @@ const App = () => {
       setTrendingMovies(movies);
 
     } catch (error) {
-      console.error(`Error fetching trending movies: ${error}`);
+      console.error(`Error fetching trending movies: ${error}`)
     }
   }
 
@@ -91,49 +90,47 @@ const App = () => {
 
   return (
     <main>
-      <div className="pattern">
-        <div className="wrapper">
+      <div className='pattern'>
+        <div className='wrapper'>
           <header>
             <img src="./hero.png" alt="Hero Banner" />
-            <h1>
-              Find <span className="text-gradient">Movies</span> You'll Enjoy
-              Without the Hassle
-            </h1>
+            <h1>Find <span>Movies</span> You'll Enjoy Without the Hassle</h1>
 
             <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
           </header>
-
-          {trendingMovies.length > 0 && (
-            <section className='trending'>
-              <h2>Trending Movies</h2>
-
-              <ul>
-                {trendingMovies.map((movie, index) => (
-                  <li key={movie.$id}>
-                    <p>{index + 1}</p>
-                    <img src={movie.poster_url} alt={movie.title} />
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          <section className="all-movies">
-            <h2>All Movies</h2>
-
-            {isLoading ? (
-              <Spinner />
-            ) : errorMessage ? (
-              <p className="text-red-500">{errorMessage}</p>
-            ) : (
-              <ul>
-                {movieList.map((movie) => (
-                  <MovieCard key={movie.id} movie={movie} />
-                ))}
-              </ul>
-            )}
-          </section>
         </div>
+
+        {trendingMovies.length > 0 && (
+          <section className='trending'>
+            <h2>Trending Movies</h2>
+
+            <ul>
+              {trendingMovies.map((movie, index) => (
+                <li key={movie.$id}>
+                  <p>{index + 1}</p>
+                  <img src={movie.poster_url} alt={movie.title} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        <section className='all-movies'>
+          <h2>All Movies</h2>
+
+          {isLoading
+            ? <Spinner />
+            : errorMessage
+              ? <p className='text-red-500'>{errorMessage}</p>
+              : (
+                <ul>
+                  {movieList.map((movie) => (
+                    <MovieCard key={movie.id} movie={movie} />
+                  ))}
+                </ul>
+              )
+          }
+        </section>
       </div>
     </main>
   );
